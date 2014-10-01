@@ -4,6 +4,15 @@ Jay Blog 是一个用Git来提交博客,用Markdown写博客的PHP博客框架�
 
 #安装
 
+###下载
+
+```sh
+$ git clone git@github.com:hegoku/Jay-Blog.git
+$ cd Jay-blog
+$ git submodule init
+$ git submodule update
+```
+
 ####服务器:
 
 ```sh
