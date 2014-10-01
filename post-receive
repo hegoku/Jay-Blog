@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+import os,sqlite3,re,markdown,datetime
+
+def makeMD(filename):
+	fp=open(filename)
+	a=fp.read().decode('utf-8')
+	fp.close()
+	md=markdown.Markdown(extensions=['extra','meta'])
+	html=md.convert(a)
+	return {'content':html,'meta':md.Meta}
+
+def md2html(mdFile,htmlFile):
+	
+	list_file = os.listdir(inputdir+'/post')
+	a = endWith('.md')
+	f_file = filter(a,list_file)
+
+	posts_file=[]
+
+	for v in f_file:
+		md=makeMD(mdFile)
+		fp=open(htmlFile,'w')
+		fp.write(md['content'])
+		fp.close()
+	return true
+
+webPath="/www/blog"
+articlePath=webPath+"/article"
+datePath=webPath+"/data.sqlite"
+
+database=sqlite3.connect(datePath)
+cu=database.cursor()
+
+os.popen("GIT_WORK_TREE="+webPath+" git checkout -f")
+
+log=os.popen("git log --name-status -1").readlines()[6:]
+for i in log:
+	sp=i.split("	");
+#	sp[1]=sp[1].decode('utf-8')
+	if re.search("^"+articlePath+"/.*",os.path.join(webPath,sp[1][0:-1])):
+		if sp[0]=="A":
+			md=makeMD(os.path.join(webPath,sp[1][0:-1]))
+			modifydate=datetime.datetime.strptime(md['meta']['modifydate'][0], '%Y-%m-%d %H:%M')
+			modifydate=modifydate.strftime('%Y-%m-%d')
+			date=datetime.datetime.strptime(md['meta']['date'][0], '%Y-%m-%d %H:%M')
+			date=date.strftime('%Y-%m-%d')
+			cu.execute("insert into article (title,date,modifydate,category,file,content)values(?,?,?,?,?,?)",(md['meta']['title'][0],date,modifydate,md['meta']['category'][0],os.path.basename(sp[1][0:-4].decode('utf-8')),md['content']))
+			database.commit()
+			print "添加 "+sp[1]
+		elif sp[0]=="M":
+			md=makeMD(os.path.join(webPath,sp[1][0:-1]))
+			modifydate=datetime.datetime.strptime(md['meta']['modifydate'][0], '%Y-%m-%d %H:%M')
+			modifydate=modifydate.strftime('%Y-%m-%d')
+			cu.execute("update article set modifydate=?,title=?,category=?,content=? where file='"+os.path.basename(sp[1][0:-4].decode('utf-8'))+"'",(modifydate,md['meta']['title'][0],md['meta']['category'][0],md['content']))
+			database.commit()
+			print "修改 "+sp[1]
+		elif sp[0]=="D":
+			cu.execute("delete from article where file='"+os.path.basename(sp[1][0:-4].decode('utf-8'))+"'")
+			database.commit()
+			print "删除 "+sp[1]
+
+cu.close()
+database.close()

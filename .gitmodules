@@ -1,0 +1,3 @@
+[submodule "Jay-Framework"]
+	path = Jay-Framework
+	url = git@github.com:hegoku/Jay-Framework.git
