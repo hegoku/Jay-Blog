@@ -53,7 +53,7 @@ for i in log:
 			md=makeMD(os.path.join(webPath,sp[1][0:-1]))
 			modifydate=datetime.datetime.strptime(md['meta']['modifydate'][0], '%Y-%m-%d %H:%M')
 			modifydate=modifydate.strftime('%Y-%m-%d')
-			cu.execute("update article set modifydate=?,title=?,category=?,content=? where file='"+os.path.basename(sp[1][0:-4].decode('utf-8'))+"'",(modifydate,md['meta']['title'][0],md['meta']['category'][0],md['content']))
+			cu.execute("update article set modifydate=?,title=?,category=?,content=? where file=?",(modifydate,md['met    a']['title'][0],md['meta']['category'][0],md['content'],os.path.basename(sp[1][0:-4].decode('utf-8')) ) )
 			database.commit()
 			print "修改 "+sp[1]
 		elif sp[0]=="D":
